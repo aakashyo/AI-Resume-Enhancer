@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Enhancer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2C6E49;
+            --secondary-color: #F4A261;
+            --accent-color: #F5F5F5;
+            --text-dark: #1A1D33;
+            --text-light: #FFFFFF;
+            --background-light: rgba(255, 255, 255, 0.98);
+            --card-bg-light: white;
+            --overlay-light: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.85));
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --primary-color: #4CAF50;
+            --secondary-color: #FFCA28;
+            --accent-color: #2A2A2A;
+            --text-dark: #E0E0E0;
+            --text-light: #FFFFFF;
+            --background-light: rgba(40, 40, 40, 0.98);
+            --card-bg-light: #333333;
+            --overlay-light: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(40, 40, 40, 0.85));
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBdvlfGxuQuQB1C2UfMKKxDIXjClaE_laNfw&s') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-dark);
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--overlay-light);
+            z-index: -1;
+            transition: background 0.3s ease;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+        }
+
+        .results-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), #1F4A32);
+            padding: 1.5rem 0;
+            box-shadow: 0 8px 30px rgba(44, 110, 73, 0.5);
+            border-bottom: 2px solid var(--secondary-color);
+            transition: background 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-size: 2.4rem;
+            color: var(--text-light) !important;
+            transition: all 0.2s ease;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .navbar-brand:hover {
+            transform: rotate(5deg) scale(1.1);
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            padding: 0.5rem 1.5rem !important;
+            border-radius: 25px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+
+        .animate-in {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: all 0.8s ease-out;
+        }
+
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .hero-section {
+            padding: 8rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card {
+            background: var(--background-light);
+            border-radius: 20px;
+            padding: 4rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(44, 110, 73, 0.3);
+            backdrop-filter: blur(12px);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.3s ease;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInSlideUp 1s ease-out forwards;
+        }
+
+        .hero-card .lead {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        @keyframes fadeInSlideUp {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-card:hover {
+            transform: translateY(-25px) rotate(1deg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .hero-card h1 {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 4px solid var(--primary-color);
+            animation: typing 2.5s steps(30, end), blink 0.6s step-end infinite;
+            font-size: 3rem;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--primary-color); }
+        }
+
+        .section-card {
+            background: var(--card-bg-light);
+            border-radius: 20px;
+            padding: 4rem;
+            margin: 3rem 0;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #E68A50);
+            border: 1px solid var(--secondary-color);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.2s ease;
+            animation: pulseBtn 1.5s infinite ease-in-out;
+            box-shadow: 0 6px 20px rgba(244, 162, 97, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #E68A50, var(--secondary-color));
+            transform: scale(1.15);
+            box-shadow: 0 10px 30px rgba(244, 162, 97, 0.6);
+        }
+
+        @keyframes pulseBtn {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--primary-color), #1F4A32);
+            border: 1px solid var(--primary-color);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(44, 110, 73, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #1F4A32, var(--primary-color));
+            transform: scale(1.15);
+            box-shadow: 0 10px 30px rgba(44, 110, 73, 0.6);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+
+        .feature-item {
+            background: var(--accent-color);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .feature-item:nth-child(1) { transition-delay: 0.1s; }
+        .feature-item:nth-child(2) { transition-delay: 0.2s; }
+        .feature-item:nth-child(3) { transition-delay: 0.3s; }
+        .feature-item:nth-child(4) { transition-delay: 0.4s; }
+        .feature-item:nth-child(5) { transition-delay: 0.5s; }
+        .feature-item:nth-child(6) { transition-delay: 0.6s; }
+
+        .feature-item:hover {
+            transform: scale(1.12) rotate(3deg);
+            background: var(--card-bg-light);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            border: 2px solid var(--secondary-color);
+        }
+
+        .feature-icon {
+            font-size: 3.2rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease;
+            text-shadow: 0 0 12px rgba(244, 162, 97, 0.4);
+        }
+
+        .feature-item:hover .feature-icon {
+            transform: scale(1.3) rotate(12deg);
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 3rem;
+        }
+
+        .results-card {
+            background: var(--card-bg-light);
+            border-radius: 20px;
+            padding: 3.5rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .results-card h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-breakdown {
+            background: var(--accent-color);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .download-links {
+            margin-bottom: 2.5rem;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            display: none;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .faq-section {
+            padding: 6rem 0;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .faq-header {
+            background: var(--accent-color);
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-header:hover {
+            background: #e8e8e8;
+        }
+
+        [data-theme="dark"] .faq-header:hover {
+            background: #404040;
+        }
+
+        .faq-header h4 {
+            font-size: 1.3rem;
+            margin: 0;
+            color: var(--primary-color);
+            animation: none;
+            font-weight: 600;
+        }
+
+        .faq-header .faq-toggle-icon {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            transition: transform 0.2s ease;
+        }
+
+        .faq-header:not(.collapsed) .faq-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-body {
+            padding: 1.5rem 2rem;
+            background: var(--card-bg-light);
+            border-radius: 0 0 15px 15px;
+            border-top: none;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .faq-body p {
+            margin-bottom: 0;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, var(--primary-color), #1F4A32);
+            color: var(--text-light);
+            padding: 4rem 0;
+            margin-top: 6rem;
+            box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.3);
+            border-top: 2px solid var(--secondary-color);
+            transition: background 0.3s ease;
+        }
+
+        .footer h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            color: var(--text-light);
+            text-shadow: none;
+            opacity: 1;
+        }
+
+        .footer h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--secondary-color);
+        }
+
+        .footer p {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .footer a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--secondary-color);
+        }
+
+        .footer .social-link {
+            color: var(--text-light);
+            font-size: 2rem;
+            margin: 0 1.2rem;
+            transition: all 0.2s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer .social-link:hover {
+            color: var(--secondary-color);
+            transform: translateY(-6px);
+            text-shadow: 0 0 12px rgba(244, 162, 97, 0.6);
+        }
+
+        .footer .social-link i {
+            transition: transform 0.2s ease;
+        }
+
+        .footer .social-link:hover i {
+            transform: scale(1.3);
+        }
+
+        .footer .contact-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer .contact-info i {
+            margin-right: 0.8rem;
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+        }
+
+        .footer .copyright {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .footer .footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .footer .footer-column {
+                align-items: flex-start;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">AI RESUME ENHANCER</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#upload">Upload</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item">
+                        <span class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section animate-in">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="hero-card text-center">
+                        <h1 class="mb-4">Elevate Your Career with AI</h1>
+                        <p class="lead mb-4">Transform your resume with cutting-edge AI technology to beat ATS systems and impress recruiters.</p>
+                        <a href="#upload" class="btn btn-primary">Enhance Now <i class="fas fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-5 animate-in">
+        <div class="container">
+            <div class="section-card">
+                <h2 class="text-center mb-5">Why AI Resume Enhancer?</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-robot feature-icon"></i>
+                        <h3>Smart Analysis</h3>
+                        <p>AI-powered insights tailored to your industry.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-filter feature-icon"></i>
+                        <h3>ATS Mastery</h3>
+                        <p>Optimized formatting for applicant tracking systems.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-key feature-icon"></i>
+                        <h3>Keyword Optimization</h3>
+                        <p>Boost your resume with targeted keywords to match job descriptions.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-pen-fancy feature-icon"></i>
+                        <h3>Grammar & Style Enhancement</h3>
+                        <p>Polish your resume with flawless grammar and professional style.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-lightbulb feature-icon"></i>
+                        <h3>Actionable Feedback</h3>
+                        <p>Get detailed insights to improve your resume's impact.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-clock feature-icon"></i>
+                        <h3>Time-Saving Efficiency</h3>
+                        <p>Enhance your resume in minutes with automated AI analysis and suggestions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="upload" class="py-5 animate-in">
+        <div class="container">
+            <div class="section-card">
+                <h2 class="text-center mb-5">Transform Your Resume</h2>
+                <form id="uploadForm" class="upload-form" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Your Resume</label>
+                        <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.docx" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Job Description (Optional)</label>
+                        <textarea class="form-control" id="job_description" name="job_description" rows="4" placeholder="Paste job description for targeted optimization"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary" id="enhanceBtn">Enhance Resume</button>
+                    </div>
+                    <div class="error-message" id="errorMessage"></div>
+                </form>
+
+                <div class="results-section" id="resultsSection">
+                    <div class="results-card">
+                        <h1>Enhanced Resume</h1>
+                        <pre id="correctedText" class="mb-4"></pre>
+                        <h3>Score Breakdown</h3>
+                        <div class="score-breakdown" id="scoreBreakdown"></div>
+                        <h3>Missing Keywords</h3>
+                        <ul id="missingKeywords" class="list-unstyled mb-4"></ul>
+                        <h3>Action Verb Suggestions</h3>
+                        <ul id="actionVerbSuggestions" class="list-unstyled mb-4"></ul>
+                        <h3>Download Enhanced Resume</h3>
+                        <div class="download-links" id="downloadLinks"></div>
+                        <h3>Comparison</h3>
+                        <p id="diffInfo"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="faq-section py-5 animate-in">
+        <div class="container">
+            <div class="section-card">
+                <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+                <div class="accordion" id="faqAccordion">
+                    <div class="faq-item">
+                        <div class="faq-header" id="headingOne">
+                            <h4 class="mb-0" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                What is AI Resume Enhancer?
+                                <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="faq-body">
+                                <p>AI Resume Enhancer is an AI-powered tool designed to enhance your resume by improving grammar, optimizing for ATS systems, and providing actionable feedback to help you land your dream job.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header" id="headingTwo">
+                            <h4 class="mb-0 collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                How does the AI enhance my resume?
+                                <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="faq-body">
+                                <p>The AI analyzes your resume for grammar, structure, and keywordPed relevance. It rewrites sentences using dynamic, results-oriented language, adds quantifiable metrics, and ensures your resume is optimized for applicant tracking systems (ATS).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header" id="headingThree">
+                            <h4 class="mb-0 collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Is my data safe with AI Resume Enhancer?
+                                <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                            </h4>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="faq-body">
+                                <p>Yes, we prioritize your privacy. All uploaded files are processed securely and deleted after enhancement. We do not store your personal data longer than necessary.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header" id="headingFour">
+                            <h4 class="mb-0 collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                Can I use AI Resume Enhancer for any job application?
+                                <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                            </h4>
+                        </div>
+                        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="faq-body">
+                                <p>Absolutely! AI Resume Enhancer works for any industry. You can also provide a job description to tailor your resume specifically for a role, ensuring it matches the required skills and keywords.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-header" id="headingFive">
+                            <h4 class="mb-0 collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                What file formats does AI Resume Enhancer support?
+                                <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                            </h4>
+                        </div>
+                        <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                            <div class="faq-body">
+                                <p>Currently, AI Resume Enhancer supports PDF files for upload. We recommend uploading your resume in PDF format to ensure accurate text extraction and enhancement.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="row text-center text-md-start">
+                <div class="col-md-4 mb-4 footer-column">
+                    <h3>AI Resume Enhancer</h3>
+                    <p>Empowering your career journey with cutting-edge AI technology.</p>
+                </div>
+                <div class="col-md-4 mb-4 footer-column">
+                    <h3>Contact Us</h3>
+                    <div class="contact-info">
+                        <i class="fas fa-envelope"></i>
+                        <p><a href="/cdn-cgi/l/email-protection#c0b3b5b0b0afb2b480a1a9b2a5b3b5ada5a5aea8a1aea3a5b2eea3afad"><span class="__cf_email__" data-cfemail="0a797f7a7a65787e4a6b63786f797f676f6f64626b64696f7824696567">[email&#160;protected]</span></a></p>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-phone"></i>
+                        <p>850-950-6477</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 footer-column">
+                    <h3>Connect With Us</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center copyright">
+                    <p>© 2025 AI Resume Enhancer. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const icon = themeToggle.querySelector('i');
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Animation Observer
+        const animateElements = document.querySelectorAll('.animate-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    if (entry.target.id === 'features') {
+                        const featureItems = entry.target.querySelectorAll('.feature-item');
+                        featureItems.forEach(item => item.classList.add('visible'));
+                    }
+                }
+            });
+        }, { threshold: 0.2 });
+        animateElements.forEach(el => observer.observe(el));
+
+        // Form Submission Logic
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const enhanceBtn = document.getElementById('enhanceBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsSection = document.getElementById('resultsSection');
+            enhanceBtn.disabled = true;
+            enhanceBtn.textContent = 'Processing...';
+            errorMessage.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('resume', document.getElementById('resume').files[0]);
+            formData.append('job_description', document.getElementById('job_description').value);
+
+            try {
+                const response = await fetch('/enhance', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    errorMessage.textContent = data.error;
+                    errorMessage.style.display = 'block';
+                } else {
+                    document.getElementById('correctedText').textContent = data.corrected_text;
+                    document.getElementById('scoreBreakdown').innerHTML = `
+                        <p><strong>Total Score:</strong> ${data.score_breakdown.total_score}/100</p>
+                        <p><strong>Grammar Score:</strong> ${data.score_breakdown.grammar_score}/40</p>
+                        <p><strong>Keyword Score:</strong> ${data.score_breakdown.keyword_score}/30</p>
+                        <p><strong>Formatting Score:</strong> ${data.score_breakdown.formatting_score}/20</p>
+                        <p><strong>Structure Score:</strong> ${data.score_breakdown.structure_score}/10</p>
+                        <p><strong>Feedback:</strong> ${data.score_breakdown.feedback}</p>
+                    `;
+                    document.getElementById('missingKeywords').innerHTML = data.missing_keywords.length > 0
+                        ? data.missing_keywords.map(kw => `<li>${kw}</li>`).join('')
+                        : '<li>No missing keywords detected.</li>';
+                    document.getElementById('actionVerbSuggestions').innerHTML = data.action_verb_suggestions.length > 0
+                        ? data.action_verb_suggestions.map(sug => `<li>${sug}</li>`).join('')
+                        : '<li>No weak verbs detected.</li>';
+                    document.getElementById('downloadLinks').innerHTML = `
+                        ${data.download_links.pdf ? `<a href="${data.download_links.pdf}" download class="btn btn-download">Download PDF <i class="fas fa-download ms-2"></i></a>` : ''}
+                    `;
+                    document.getElementById('diffInfo').textContent = `Original Length: ${data.diff_info.original_length} characters | Enhanced Length: ${data.diff_info.enhanced_length} characters | Change: ${data.diff_info.difference_percentage}%`;
+                    resultsSection.style.display = 'block';
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An unexpected error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                enhanceBtn.disabled = false;
+                enhanceBtn.textContent = 'Enhance Resume';
+            }
+        });
+    </script>
+</body>
+</html>
